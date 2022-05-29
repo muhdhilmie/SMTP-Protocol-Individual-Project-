@@ -1,12 +1,5 @@
- #include <stdio.h>
- #include <stdlib.h>
- #include <sys/socket.h>
- #include <netinet/in.h>
- #include <netdb.h>
- #include <arpa/inet.h>
- #include <string.h>
- #include <unistd.h>
- #include <time.h>
+ #include<string.h>
+ #include<sys/socket.h>
  #define domain "server.smtp.com"
 	char mail_from[100];
 	char mail_to[100];
@@ -20,7 +13,6 @@ void send_image(int socket)
 	char send_buffer[10239];
 	char read_buffer[256];
 	char f_name[100];
-	char fgets;
     	printf("\nEnter Image Path/Image file name : ");
     	scanf("%s",f_name);
     	fpimage = fopen(f_name, "r");
@@ -128,7 +120,7 @@ void send_image(int socket)
     	do
     	{
         	printf("Enter the command : ");
-        	intake: fgets(cname, 256, stdin);  
+        	intake: gets(cname);
         	//cname[strlen(cname) + 1] = '\0';
         	char code[4];//to store the 3 digit response code received from server
 	if(strcasecmp(cname,"HELO") == 0)
@@ -171,7 +163,6 @@ void send_image(int socket)
             	printf("\nEnter Sender Email id : ");
             	scanf("%s",mail_from);
             	strcpy(buff,"MAIL FROM:<");
-            	strcpy(buff,"ain.nabilah1194@gmail.com");
             	strcat(buff,mail_from);
             	strcat(buff,">");
             	strcat(buff,"\r\n");
@@ -209,7 +200,6 @@ void send_image(int socket)
             	printf("\nEnter Recipient Email id : ");
             	scanf("%s",mail_to);
             	strcpy(buff,"RCPT TO:<");
-            	strcpy(buff,"ainnabilah@gmail.com");
             	strcat(buff,mail_to);
             	strcat(buff,">");
             	strcat(buff,"\r\n");
@@ -263,6 +253,7 @@ void send_image(int socket)
             	code[0] = buff[0];
             	code[1] = buff[1];
             	code[2] = buff[2];
+
 	if(strcmp(code,"354") == 0)
             {
                 printf("\nReady to send header data!\n\n");
@@ -270,13 +261,13 @@ void send_image(int socket)
             else{
                 printf("\nError occured!\n\n");
             }
+
             	//creating a mail header
             	char sub[150];
             	char content[450];
             	printf("\nEnter Subject : ");
             	scanf("%[^\n]",sub);
             	printf("\nEnter content : (Press Tab and Enter Key to end)\n");
-            	printf("\nHi Ain\n");
             	scanf("%[^\t]",content);
 
             	bzero(buff,10240);
@@ -303,95 +294,3 @@ void send_image(int socket)
             {
                 printf("\nError occured while reading from socket!\n");
             }
-            	printf("SERVER : %s\n",buff);     //250 OK
-            	//checking error
-            	code[0] = buff[0];
-            	code[1] = buff[1];
-            	code[2] = buff[2];
-            	code[3] = '\0';
-		code[3] = '\0';
-if(strcmp(code,"250") == 0)
-            {
-                printf("\nGo to next command...\n\n");
-            }
-            else{
-                printf("\nError occured!\n\n");
-            }
-            fflush(stdin);
-        }
-        else if(strcasecmp(cname,"ATTACHMENT") == 0){
-            bzero(buff,10240);
-			strcpy(buff,"Attachment");
-			strcat(buff,"\r\n");
-			n = write(socket_id,buff,strlen(buff));
-			if(n < 0)
-			{
-			    printf("\nError occured while writing to socket!\n");
-			}
-			printf("\nCLIENT : %s",buff);  //DATA
-			bzero(buff,10240);
-			n = read(socket_id,buff,10239);
-			if(n < 0)
-			{
-			    printf("\nError occured while reading from socket!\n");
-			}
-			printf("SERVER : %s\n",buff);  //420 send Attachment
-			code[0] = buff[0];
-			code[1] = buff[1];
-			code[2] = buff[2];
-			code[3] = '\0';
-			if(strcmp(code,"420") == 0)
-			{
-			    printf("\nReady to send image!\n\n");
-			}
-			else{
-			    printf("\nError occured!\n\n");
-			}
-			send_image(socket_id);
-			bzero(buff,10240);
-			n = read(socket_id,buff,10239);
-			if(n < 0)
-			{
-			    printf("\nError occured while reading from socket!\n");
-			}
-			printf("SERVER : %s\n\n",buff);
-        }
-        else if(strcasecmp(cname,"QUIT") == 0)
-        {
-            bzero(buff,10240);
-            strcpy(buff,"QUIT");
-            strcat(buff,"\r\n");
-            n = write(socket_id,buff,strlen(buff));
-            if(n < 0)
-            {
-                printf("\nError occured while writing to socket!\n");
-            }
-            printf("\nCLIENT : %s",buff);  //QUIT
-            bzero(buff,10240);
-            n = read(socket_id,buff,10239);
-            if(n < 0)
-            {
-                printf("\nError occured while reading from socket!\n");
-            }
-            printf("SERVER : %s\n",buff);    //221 Bye
-            //checking error
-            code[0] = buff[0];
-            code[1] = buff[1];
-            code[2] = buff[2];
-            code[3] = '\0';
-            if(strcmp(code,"221") == 0)
-            {
-                printf("\nConnection closed successfully with SMTP Server!\n\n");
-            }
-            else{
-                printf("\nError occured!\n\n");
-            }
-            fflush(stdin);
-        }
-        else
-        {
-        	strcpy(cname,"");
-        	goto intake;
-        }
-    }while(strcmp(cname,"QUIT") != 0);
-}
